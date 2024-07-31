@@ -1,0 +1,90 @@
+aliases:
+    co: pr checkout
+    get-prs-no-deps-gql: |-
+        api graphql -f query='{
+          search(
+            query: "is:pr is:open review-requested:@me archived:false -label:dependencies -label:bump-dependencies",
+            type: ISSUE,
+            first: 100
+          ) {
+            edges {
+              node {
+                ... on PullRequest {
+                  title
+                  url
+                  repository {
+                    name
+                  }
+                  createdAt
+                  number
+                  author {
+                    login
+                  }
+                }
+              }
+            }
+          }
+        }'
+    get-prs-gql: |-
+        api graphql -f query='{
+          search(
+            query: "is:pr is:open review-requested:@me archived:false",
+            type: ISSUE,
+            first: 100
+          ) {
+            edges {
+              node {
+                ... on PullRequest {
+                  title
+                  url
+                  repository {
+                    name
+                  }
+                  createdAt
+                  number
+                  author {
+                    login
+                  }
+                }
+              }
+            }
+          }
+        }'
+        
+    get-own-prs: |-
+        api graphql -f query='{
+          search(
+            query: "is:pr is:open author:@me archived:false",
+            type: ISSUE,
+            first: 100
+          ) {
+            edges {
+            node {
+                ... on PullRequest {
+                    title
+                    url
+                    repository {
+                        name
+                    }
+                    number
+                    latestReviews(last: 1) {
+                        nodes {
+                            createdAt
+                            author {
+                                login
+                            }
+                        }
+                    }
+                    author {
+                        login
+                    }
+                    reviewDecision
+                }
+            }
+            }
+          }
+        }'
+    open-web-pr: pr view --repo $1/$2 $3 --web
+
+    # replace code with your IDE of choice
+    code-ct-pr: '!cd $1/$2 && gh pr checkout $3 && code . ${4:-""}'
